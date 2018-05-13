@@ -9,3 +9,5 @@ OdD1-Synth/Debug/OdD1-Synth.map
 OdD1-Synth/Debug/OdD1-Synth.srec
 OdD1-Synth/Debug/makedep.mk
 OdD1-Synth/Debug/Makefile
+*.o
+*.d
