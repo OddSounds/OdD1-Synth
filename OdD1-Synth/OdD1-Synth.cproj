@@ -135,6 +135,9 @@
     <Compile Include="Header\ADC.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Header\DigitalIO.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Header\PinDefs.h">
       <SubType>compile</SubType>
     </Compile>
