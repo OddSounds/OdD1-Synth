@@ -1,7 +1,5 @@
 #include "ADC.h"
 
-#include "PinDefs.h"
-
 uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
 uint8_t CurrentChannel;
 
@@ -12,13 +10,16 @@ void ADC_Init()
 	sbi(ADMUX, REFS0); //AVCC Reference
 	sbi(ADCSRA, ADPS2); //Div 16
 	sbi(ADCSRA, ADEN); //Enable ADC
-	DIDR0 = (1 << ADC0D) | (1 << ADC1D); //Disable digital input A0, A1
+	DIDR0 = (1 << ADC0D) | (1 << ADC1D) | (1 << ADC2D) | (1 << ADC3D); //Disable digital input A0, A1, A2, A3
 	
 	//Setup the MUX
 	
 	//Set the MUX
 	CurrentChannel = 0;
 	cbi(ADMUX, MUX0);
+	cbi(ADMUX, MUX1);
+	cbi(ADMUX, MUX2);
+	cbi(ADMUX, MUX3);
 	
 	//Start first conversion
 	sbi(ADCSRA, ADSC);

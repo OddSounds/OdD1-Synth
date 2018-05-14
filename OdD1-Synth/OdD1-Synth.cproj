@@ -138,10 +138,16 @@
     <Compile Include="Header\PinDefs.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Header\SPI.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Source\ADC.c">
       <SubType>compile</SubType>
     </Compile>
     <Compile Include="Source\main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="Source\SPI.c">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>
