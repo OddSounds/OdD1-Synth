@@ -4,12 +4,22 @@ uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
 uint8_t CurrentChannel;
 uint8_t Current01MuxChannel, Next01MuxChannel, Current23MuxChannel, Next23MuxChannel;
 
+pin_t ADC01Clk = {&PORTC, PORTC4};
+pin_t ADC23Clk = {&PORTC, PORTC5};
+pin_t ADCMuxReset = {&PORTC, PORTC6};
+
 void l_ADCReset()
 {
 	CurrentChannel = 0;
 	
 	Current01MuxChannel = Next01MuxChannel = 0;
 	Current23MuxChannel = Next23MuxChannel = 0;
+	
+	ClrPin(ADC01Clk);
+	ClrPin(ADC23Clk);
+	
+	ClrPin(ADCMuxReset);
+	SetPin(ADCMuxReset);
 	
 	sbi(ADMUX, MUX0);
 	cbi(ADMUX, MUX1);
@@ -19,12 +29,14 @@ void l_ADCReset()
 
 void l_Increment01MuxChannel()
 {
-	
+	SetPin(ADC01Clk);
+	ClrPin(ADC01Clk);
 }
 
 void l_Increment23MuxChannel()
 {
-	
+	SetPin(ADC23Clk);
+	ClrPin(ADC23Clk);
 }
 
 void ADC_Init()
@@ -66,11 +78,9 @@ void ADC_Update()
 			//Using a 01 or 23 mux?
 			//Ping-pong the readins where the 1st 2 happen on the 1st mux and the next 2 happen on the 2nd mux
 			if(CurrentChannel & 0x02) //A 23 mux, update 01
-			{
-			}
+				Next01MuxChannel = (CurrentChannel + 2) >> 2;
 			else //A 01 mux, update 23
-			{
-			}
+				Next23MuxChannel = (CurrentChannel + 2) >> 2;
 		}
 		else
 		{
