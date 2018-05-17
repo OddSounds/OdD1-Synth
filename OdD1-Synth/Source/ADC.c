@@ -84,8 +84,8 @@ void ADC_Update()
 			CurrentChannel = 0;
 	
 		//Switch to the next input
-		ADMUX &= 0xF0;
-		ADMUX |= CurrentChannel & 0x03;
+		ADMUX &= 0xF0; //Just keep the upper nibble
+		ADMUX |= CurrentChannel & 0x03; //Set the new input
 		
 		if(CurrentChannel < ANALOG_DO_NOT_READ) //Normal reading
 		{
