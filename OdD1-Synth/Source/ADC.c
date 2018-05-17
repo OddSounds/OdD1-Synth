@@ -1,8 +1,14 @@
 #include "ADC.h"
+#include <string.h>
+#include <stdlib.h>
 
 uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
 uint8_t CurrentChannel;
 uint8_t Current01MuxChannel, Next01MuxChannel, Current23MuxChannel, Next23MuxChannel;
+
+typedef void (*OnADCChange)(uint16_t);
+
+OnADCChange ADCChangeHandler[TOTAL_ANALOG_READINGS];
 
 pin_t ADC01Clk = {&PORTC, PORTC4};
 pin_t ADC23Clk = {&PORTC, PORTC5};
@@ -48,7 +54,7 @@ void ADC_Init()
 	sbi(ADCSRA, ADEN); //Enable ADC
 	DIDR0 = (1 << ADC0D) | (1 << ADC1D) | (1 << ADC2D) | (1 << ADC3D); //Disable digital input A0, A1, A2, A3
 	
-	//Setup the MUX
+	memset(ADCChangeHandler, 0, sizeof(ADCChangeHandler));
 	
 	//Set the MUX
 	l_ADCReset();
@@ -62,8 +68,16 @@ void ADC_Update()
 	//Is conversion ready?
 	if(!(ADCSRA & (1 << ADSC)))
 	{
-		*((uint8_t*)&AnalogReading[CurrentChannel]) = ADCL;
-		*((uint8_t*)&AnalogReading[CurrentChannel] + 1) = ADCH;
+		uint16_t newreading;
+		
+		*((uint8_t*)&newreading) = ADCL;
+		*((uint8_t*)&newreading + 1) = ADCH;
+		
+		if(ADCChangeHandler[CurrentChannel] && abs(AnalogReading[CurrentChannel] - newreading) > MIN_ADC_CHANGE)
+			ADCChangeHandler[CurrentChannel](newreading);
+		
+		AnalogReading[CurrentChannel] = newreading;
+		
 		CurrentChannel++;
 	
 		if(CurrentChannel >= TOTAL_ANALOG_READINGS)
