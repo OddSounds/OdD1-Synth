@@ -7,6 +7,8 @@ int main(void)
 {
 	ADC_Init();
 	SPI_Init();
+
+	Osc_Init();
 	
     while (1) 
     {
