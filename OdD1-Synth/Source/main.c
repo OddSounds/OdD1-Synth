@@ -10,6 +10,8 @@ int main(void)
 
 	Osc_Init();
 	
+	sei();
+	
     while (1) 
     {
 		ADC_Update();

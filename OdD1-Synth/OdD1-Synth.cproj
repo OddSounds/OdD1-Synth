@@ -147,6 +147,9 @@
     <Compile Include="Header\SPI.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="Header\WaveTables.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="Source\ADC.c">
       <SubType>compile</SubType>
     </Compile>

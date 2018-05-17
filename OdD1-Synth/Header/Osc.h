@@ -22,6 +22,7 @@ PROGMEM const uint32_t keyFreq[] =
 typedef struct
 {
 	uint8_t note, waveform, wavemix;
+	uint8_t phase;
 	uint32_t tuningword, phaseaccum;
 }osc_t;
 
