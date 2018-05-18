@@ -1,6 +1,8 @@
 #include "Osc.h"
 #include "ADC.h"
 
+#include "WaveTables.h"
+
 extern uint16_t AnalogReading;
 
 uint8_t oscsync = 0;
@@ -19,8 +21,10 @@ void Osc_Init()
 	
 	//Initialize oscillators
 	osc1.note = osc2.note = 44;
+	osc1.waveform = osc2.waveform = WAVE_SINE;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
-	osc1.phase = osc2.phase = 0;
+	osc1.phase = 0;
+	osc2.phase = 128;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
 	
 	// Timer2 PWM Mode set to Phase Correct PWM
@@ -40,28 +44,40 @@ void Osc_Init()
 	cbi (TCCR2B, CS22);	
 }
 
+//230 cycles
 ISR(TIMER2_OVF_vect)
 {
-	uint16_t osc1Out, osc2Out, mixOut;
+	int16_t osc1Out, osc2Out;
+	int16_t mixOut;
+	
+	osc1Out = osc2Out = mixOut = 0;
 	
 	osc1.phaseaccum += osc1.tuningword;
 	osc2.phaseaccum += osc2.tuningword;
 	
-	osc1Out = *byte_addr(osc1.phaseaccum, 3);
-	osc2Out = *byte_addr(osc2.phaseaccum, 3);
+	//Grab the wave
+	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*byte_addr(osc1.phaseaccum, 2) + osc1.phase));
+	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*byte_addr(osc2.phaseaccum, 2) + osc2.phase));
 	
-	if(*byte_addr(osc1Out, 1))
-		*byte_addr(osc1Out, 0) = 0xFF;
+	if(*byte_addr(osc1Out, 0) & 0x80)
+		*byte_addr(osc1Out, 1) = 0xFF;
+	
+	if(*byte_addr(osc2Out, 0) & 0x80)
+		*byte_addr(osc2Out, 1) = 0xFF;	
+	
+	//Mix the signals
+	mixOut = osc1Out;
+	mixOut += osc2Out;
+	mixOut >>= 1; //Divide by 2
+	
+	//Clip
+	if((*byte_addr(mixOut, 1) & 0x80) && *byte_addr(mixOut, 1) != 0xFF)
+		*byte_addr(mixOut, 0) = 0x80;
 		
-	if(*byte_addr(osc2Out, 1))
-		*byte_addr(osc2Out, 0) = 0xFF;
+	if(!(*byte_addr(mixOut, 1) & 0x80) && *byte_addr(mixOut, 1) != 0)
+		*byte_addr(mixOut, 0) = 0x7F;
 	
-	mixOut = *byte_addr(osc1Out, 0);
-	mixOut += *byte_addr(osc2Out, 0);
-	mixOut >>= 1;
-	
-	if(*byte_addr(mixOut, 1))
-		*byte_addr(mixOut, 0) = 0xFF;
+	*byte_addr(mixOut, 0) += 0x80; //Add a zero offset
 	
 	OCR2A = *byte_addr(mixOut, 0);
 	OCR2B = 0;
