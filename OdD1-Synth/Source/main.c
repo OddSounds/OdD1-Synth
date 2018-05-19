@@ -10,7 +10,6 @@ int main(void)
 	SPI_Init();
 	
 	UART_begin(115200);
-	UART_puts("HELLO WORLD\n", 12, 0);
 	
     while (1) 
     {

@@ -110,24 +110,30 @@ void UART_puts(char* s, unsigned int len, unsigned char channel)
 
 void UART_putn(int n, unsigned char channel)
 {
-	cbi(UCSR0B, TXCIE0);
+	char numstr[10], sign = 0;
+	char index = 9;
+	
+	memset(numstr, 0, sizeof(numstr));
+	
 	if(n < 0)
-	pushq(TXBuffer[channel], txin[channel], txcount[channel], UART_TX_BUFFER_SIZE, '-');
+		sign = 1;
 	
 	n = abs(n);
 	
 	while(n > 0)
 	{
-		pushq(TXBuffer[channel], txin[channel], txcount[channel], UART_TX_BUFFER_SIZE, (char)(n % 10) + '0');
+		numstr[index] = (char)(n % 10) + '0';
 		n /= 10;
+		index--;
 	}
-	sbi(UCSR0B, TXCIE0);
 	
-	if(UCSR0A & (1 << UDRE0))
+	if(sign)
 	{
-		txchannel = channel;
-		popq(TXBuffer[channel], txout[channel], txcount[channel], UART_TX_BUFFER_SIZE, UDR0);
+		numstr[index] = '-';
+		index--;
 	}
+	
+	UART_puts(numstr + index + 1, 10 - (index + 1), channel);
 }
 //TX Functions End
 
