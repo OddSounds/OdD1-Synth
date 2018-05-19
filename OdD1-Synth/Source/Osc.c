@@ -2,13 +2,15 @@
 #include "ADC.h"
 
 #include "WaveTables.h"
+#include <stdlib.h>
 
-extern uint16_t AnalogReading;
+extern uint16_t* AnalogReading;
 
 uint8_t oscsync = 0;
 volatile osc_t osc1, osc2;
 
 #define byte_addr(v, o)		((uint8_t*)&v + o)
+#define short_addr(v, o)	((uint16_t*)&v + o)
 
 void l_NoiseUpdate()
 {
@@ -24,7 +26,7 @@ void Osc_Init()
 	osc1.waveform = osc2.waveform = WAVE_SINE;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = 0;
-	osc2.phase = 128;
+	osc2.phase = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
 	
 	// Timer2 PWM Mode set to Phase Correct PWM
@@ -47,7 +49,7 @@ void Osc_Init()
 //230 cycles
 ISR(TIMER2_OVF_vect)
 {
-	int16_t osc1Out, osc2Out;
+	uint16_t osc1Out, osc2Out, fraction, whole;
 	int16_t mixOut;
 	
 	osc1Out = osc2Out = mixOut = 0;
@@ -57,27 +59,33 @@ ISR(TIMER2_OVF_vect)
 	
 	//Grab the wave
 	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*byte_addr(osc1.phaseaccum, 2) + osc1.phase));
-	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*byte_addr(osc2.phaseaccum, 2) + osc2.phase));
+	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*byte_addr(osc2.phaseaccum, 2) + osc2.phase + SUB_PHASE_SHIFT));
 	
-	if(*byte_addr(osc1Out, 0) & 0x80)
-		*byte_addr(osc1Out, 1) = 0xFF;
+	fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
+	whole = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 1);
+	osc1Out = *byte_addr(fraction, 1);
+	osc1Out += *byte_addr(whole, 0);
+	if(osc1Scalar < osc2Scalar)
+		osc1Out += bias;
 	
-	if(*byte_addr(osc2Out, 0) & 0x80)
-		*byte_addr(osc2Out, 1) = 0xFF;	
+	fraction = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 0);
+	whole = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 1);
+	osc2Out = *byte_addr(fraction, 1);
+	osc2Out += *byte_addr(whole, 0);
+	if(osc2Scalar < osc1Scalar)
+		osc2Out += bias;
 	
 	//Mix the signals
 	mixOut = osc1Out;
-	mixOut += osc2Out;
+	mixOut -= osc2Out;
 	mixOut >>= 1; //Divide by 2
 	
-	//Clip
-	if((*byte_addr(mixOut, 1) & 0x80) && *byte_addr(mixOut, 1) != 0xFF)
-		*byte_addr(mixOut, 0) = 0x80;
+	if(mixOut < -128)
+		mixOut = -128;
+	else if(mixOut > 128)
+		mixOut = 128;
 		
-	if(!(*byte_addr(mixOut, 1) & 0x80) && *byte_addr(mixOut, 1) != 0)
-		*byte_addr(mixOut, 0) = 0x7F;
-	
-	*byte_addr(mixOut, 0) += 0x80; //Add a zero offset
+	*byte_addr(mixOut, 0) += 0x80;
 	
 	OCR2A = *byte_addr(mixOut, 0);
 	OCR2B = 0;

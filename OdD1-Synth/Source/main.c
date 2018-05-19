@@ -1,6 +1,7 @@
 #include "PinDefs.h"
 
 #include "ADC.h"
+#include "Osc.h"
 #include "SPI.h"
 
 int main(void)

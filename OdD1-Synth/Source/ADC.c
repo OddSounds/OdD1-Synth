@@ -55,6 +55,7 @@ void ADC_Init()
 	DIDR0 = (1 << ADC0D) | (1 << ADC1D) | (1 << ADC2D) | (1 << ADC3D); //Disable digital input A0, A1, A2, A3
 	
 	memset(ADCChangeHandler, 0, sizeof(ADCChangeHandler));
+	memset(AnalogReading, 0x0F, sizeof(AnalogReading));
 	
 	//Set the MUX
 	l_ADCReset();
