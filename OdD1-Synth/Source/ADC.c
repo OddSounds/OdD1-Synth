@@ -12,7 +12,7 @@ OnADCChange ADCChangeHandler[TOTAL_ANALOG_READINGS];
 
 pin_t ADC01Clk = {&PORTC, PORTC4};
 pin_t ADC23Clk = {&PORTC, PORTC5};
-pin_t ADCMuxReset = {&PORTC, PORTC6};
+pin_t ADCMuxReset = {&PORTD, PORTD7};
 
 void l_ADCReset()
 {
@@ -55,6 +55,11 @@ void ADC_Init()
 	DIDR0 = (1 << ADC0D) | (1 << ADC1D) | (1 << ADC2D) | (1 << ADC3D); //Disable digital input A0, A1, A2, A3
 	
 	memset(ADCChangeHandler, 0, sizeof(ADCChangeHandler));
+	
+	//Setup pins
+	sbi(DDRC, PORTC4);
+	sbi(DDRC, PORTC5);
+	sbi(DDRD, PORTD7);
 	
 	//Set the MUX
 	l_ADCReset();

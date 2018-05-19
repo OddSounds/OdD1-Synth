@@ -1211,9 +1211,9 @@ We've spent an enormous amount of time creating and checking these footprints an
 <label x="129.54" y="111.76" size="1.778" layer="95"/>
 </segment>
 <segment>
-<pinref part="U2" gate="A" pin="PC6"/>
-<wire x1="93.98" y1="55.88" x2="116.84" y2="55.88" width="0.1524" layer="91"/>
-<label x="96.52" y="55.88" size="1.778" layer="95"/>
+<pinref part="U2" gate="A" pin="PD7"/>
+<wire x1="93.98" y1="76.2" x2="109.22" y2="76.2" width="0.1524" layer="91"/>
+<label x="96.52" y="76.2" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC_01_CLK" class="0">
@@ -1427,6 +1427,13 @@ We've spent an enormous amount of time creating and checking these footprints an
 <pinref part="U3" gate="G$1" pin="Y"/>
 <wire x1="241.3" y1="-48.26" x2="220.98" y2="-48.26" width="0.1524" layer="91"/>
 <label x="220.98" y="-48.26" size="1.778" layer="95"/>
+</segment>
+</net>
+<net name="MCU_RST" class="0">
+<segment>
+<pinref part="U2" gate="A" pin="PC6"/>
+<wire x1="93.98" y1="55.88" x2="116.84" y2="55.88" width="0.1524" layer="91"/>
+<label x="96.52" y="55.88" size="1.778" layer="95"/>
 </segment>
 </net>
 </nets>

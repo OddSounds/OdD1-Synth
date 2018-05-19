@@ -75,6 +75,7 @@
 <layer number="125" name="_tNames" color="7" fill="1" visible="no" active="yes"/>
 <layer number="144" name="Drill_legend" color="7" fill="1" visible="no" active="yes"/>
 <layer number="151" name="HeatSink" color="7" fill="1" visible="no" active="yes"/>
+<layer number="199" name="Contour" color="7" fill="1" visible="no" active="yes"/>
 <layer number="200" name="200bmp" color="1" fill="10" visible="no" active="yes"/>
 <layer number="201" name="201bmp" color="2" fill="10" visible="no" active="yes"/>
 <layer number="202" name="202bmp" color="3" fill="10" visible="no" active="yes"/>
@@ -802,6 +803,38 @@ or will meet your specific requirements.&lt;p&gt;
 </deviceset>
 </devicesets>
 </library>
+<library name="SparkFun-Aesthetics">
+<description>&lt;h3&gt;SparkFun Electronics' preferred foot prints&lt;/h3&gt;
+In this library you'll find non-functional items- supply symbols, logos, notations, frame blocks, etc.&lt;br&gt;&lt;br&gt;
+We've spent an enormous amount of time creating and checking these footprints and parts, but it is the end user's responsibility to ensure correctness and suitablity for a given componet or application. If you enjoy using this library, please buy one of our products at www.sparkfun.com.
+&lt;br&gt;&lt;br&gt;
+&lt;b&gt;Licensing:&lt;/b&gt; CC v3.0 Share-Alike You are welcome to use this library for commercial purposes. For attribution, we ask that when you begin to sell your device using our footprint, you email us with a link to the product being sold. We want bragging rights that we helped (in a very small part) to create your 8th world wonder. We would like the opportunity to feature your device on our homepage.</description>
+<packages>
+</packages>
+<symbols>
+<symbol name="VCC2">
+<wire x1="0.762" y1="1.27" x2="0" y2="2.54" width="0.254" layer="94"/>
+<wire x1="0" y1="2.54" x2="-0.762" y2="1.27" width="0.254" layer="94"/>
+<text x="-1.016" y="3.556" size="1.778" layer="96">&gt;VALUE</text>
+<pin name="VCC" x="0" y="0" visible="off" length="short" direction="sup" rot="R90"/>
+</symbol>
+</symbols>
+<devicesets>
+<deviceset name="VCC" prefix="SUPPLY">
+<description>&lt;b&gt;SUPPLY SYMBOL&lt;/b&gt;</description>
+<gates>
+<gate name="1" symbol="VCC2" x="0" y="0"/>
+</gates>
+<devices>
+<device name="">
+<technologies>
+<technology name=""/>
+</technologies>
+</device>
+</devices>
+</deviceset>
+</devicesets>
+</library>
 </libraries>
 <attributes>
 </attributes>
@@ -829,6 +862,14 @@ or will meet your specific requirements.&lt;p&gt;
 <part name="V2" library="74ttl-din" library_urn="urn:adsk.eagle:library:84" deviceset="74*161" device="N" package3d_urn="urn:adsk.eagle:package:1462/1"/>
 <part name="U6" library="SparkFun-AnalogIC" deviceset="74HC4052" device="DIP"/>
 <part name="U7" library="SparkFun-AnalogIC" deviceset="74HC4052" device="DIP"/>
+<part name="SUPPLY5" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
+<part name="SUPPLY6" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
+<part name="SUPPLY7" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
+<part name="SUPPLY8" library="SparkFun-Aesthetics" deviceset="VCC" device=""/>
+<part name="SUPPLY9" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
+<part name="SUPPLY10" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
+<part name="SUPPLY11" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
+<part name="SUPPLY12" library="supply2" library_urn="urn:adsk.eagle:library:372" deviceset="GND" device=""/>
 </parts>
 <sheets>
 <sheet>
@@ -848,10 +889,22 @@ or will meet your specific requirements.&lt;p&gt;
 <instance part="P+2" gate="VCC" x="238.76" y="55.88"/>
 <instance part="P+3" gate="VCC" x="238.76" y="-10.16"/>
 <instance part="P+4" gate="VCC" x="238.76" y="86.36"/>
-<instance part="V1" gate="1" x="162.56" y="58.42"/>
-<instance part="V2" gate="1" x="162.56" y="-12.7"/>
+<instance part="V1" gate="1" x="170.18" y="88.9"/>
+<instance part="V2" gate="1" x="170.18" y="17.78"/>
 <instance part="U6" gate="G$1" x="251.46" y="106.68"/>
 <instance part="U7" gate="G$1" x="251.46" y="10.16"/>
+<instance part="V1" gate="/+UB" x="200.66" y="111.76"/>
+<instance part="V1" gate="/-UB" x="187.96" y="116.84"/>
+<instance part="SUPPLY5" gate="1" x="238.76" y="114.3"/>
+<instance part="SUPPLY6" gate="1" x="238.76" y="17.78"/>
+<instance part="SUPPLY7" gate="1" x="200.66" y="114.3"/>
+<instance part="SUPPLY8" gate="1" x="203.2" y="43.18"/>
+<instance part="SUPPLY9" gate="GND" x="238.76" y="93.98"/>
+<instance part="SUPPLY10" gate="GND" x="238.76" y="-2.54"/>
+<instance part="SUPPLY11" gate="GND" x="193.04" y="38.1"/>
+<instance part="SUPPLY12" gate="GND" x="187.96" y="111.76"/>
+<instance part="V2" gate="/+UB" x="203.2" y="40.64"/>
+<instance part="V2" gate="/-UB" x="193.04" y="43.18"/>
 </instances>
 <busses>
 </busses>
@@ -876,6 +929,14 @@ or will meet your specific requirements.&lt;p&gt;
 <pinref part="P+2" gate="VCC" pin="VCC"/>
 <pinref part="U5" gate="G$1" pin="VCC"/>
 <wire x1="238.76" y1="53.34" x2="241.3" y2="53.34" width="0.1524" layer="91"/>
+</segment>
+<segment>
+<pinref part="V1" gate="/+UB" pin="+UB"/>
+<pinref part="SUPPLY7" gate="1" pin="VCC"/>
+</segment>
+<segment>
+<pinref part="V2" gate="/+UB" pin="+UB"/>
+<pinref part="SUPPLY8" gate="1" pin="VCC"/>
 </segment>
 </net>
 <net name="GND" class="0">
@@ -922,6 +983,14 @@ or will meet your specific requirements.&lt;p&gt;
 <pinref part="U3" gate="G$1" pin="INH"/>
 <wire x1="241.3" y1="-55.88" x2="241.3" y2="-58.42" width="0.1524" layer="91"/>
 <junction x="241.3" y="-58.42"/>
+</segment>
+<segment>
+<pinref part="V1" gate="/-UB" pin="-UB"/>
+<pinref part="SUPPLY12" gate="GND" pin="GND"/>
+</segment>
+<segment>
+<pinref part="V2" gate="/-UB" pin="-UB"/>
+<pinref part="SUPPLY11" gate="GND" pin="GND"/>
 </segment>
 </net>
 <net name="ADC_2" class="0">
@@ -1098,44 +1167,52 @@ or will meet your specific requirements.&lt;p&gt;
 <label x="96.52" y="81.28" size="1.778" layer="95"/>
 </segment>
 </net>
-<net name="ADC_EXP_CS" class="0">
-<segment>
-<pinref part="U2" gate="A" pin="PC4"/>
-<wire x1="93.98" y1="60.96" x2="111.76" y2="60.96" width="0.1524" layer="91"/>
-<label x="96.52" y="60.96" size="1.778" layer="95"/>
-</segment>
-</net>
 <net name="ADC_RST" class="0">
 <segment>
 <pinref part="V1" gate="1" pin="!CLR"/>
-<wire x1="144.78" y1="81.28" x2="137.16" y2="81.28" width="0.1524" layer="91"/>
-<wire x1="137.16" y1="81.28" x2="137.16" y2="10.16" width="0.1524" layer="91"/>
+<wire x1="152.4" y1="111.76" x2="144.78" y2="111.76" width="0.1524" layer="91"/>
+<wire x1="144.78" y1="111.76" x2="144.78" y2="40.64" width="0.1524" layer="91"/>
 <pinref part="V2" gate="1" pin="!CLR"/>
-<wire x1="137.16" y1="10.16" x2="144.78" y2="10.16" width="0.1524" layer="91"/>
-<wire x1="137.16" y1="81.28" x2="121.92" y2="81.28" width="0.1524" layer="91"/>
-<junction x="137.16" y="81.28"/>
-<label x="121.92" y="81.28" size="1.778" layer="95"/>
+<wire x1="144.78" y1="40.64" x2="152.4" y2="40.64" width="0.1524" layer="91"/>
+<wire x1="144.78" y1="111.76" x2="129.54" y2="111.76" width="0.1524" layer="91"/>
+<junction x="144.78" y="111.76"/>
+<label x="129.54" y="111.76" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U2" gate="A" pin="PC6"/>
+<wire x1="93.98" y1="55.88" x2="116.84" y2="55.88" width="0.1524" layer="91"/>
+<label x="96.52" y="55.88" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC_01_CLK" class="0">
 <segment>
 <pinref part="V1" gate="1" pin="CLK"/>
-<wire x1="144.78" y1="55.88" x2="121.92" y2="55.88" width="0.1524" layer="91"/>
-<label x="121.92" y="55.88" size="1.778" layer="95"/>
+<wire x1="152.4" y1="86.36" x2="129.54" y2="86.36" width="0.1524" layer="91"/>
+<label x="129.54" y="86.36" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U2" gate="A" pin="PC4"/>
+<wire x1="93.98" y1="60.96" x2="116.84" y2="60.96" width="0.1524" layer="91"/>
+<label x="96.52" y="60.96" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC_23_CLK" class="0">
 <segment>
 <pinref part="V2" gate="1" pin="CLK"/>
-<wire x1="144.78" y1="-15.24" x2="121.92" y2="-15.24" width="0.1524" layer="91"/>
-<label x="121.92" y="-15.24" size="1.778" layer="95"/>
+<wire x1="152.4" y1="15.24" x2="129.54" y2="15.24" width="0.1524" layer="91"/>
+<label x="129.54" y="15.24" size="1.778" layer="95"/>
+</segment>
+<segment>
+<pinref part="U2" gate="A" pin="PC5"/>
+<wire x1="93.98" y1="58.42" x2="116.84" y2="58.42" width="0.1524" layer="91"/>
+<label x="96.52" y="58.42" size="1.778" layer="95"/>
 </segment>
 </net>
 <net name="ADC_01_SEL_0" class="0">
 <segment>
 <pinref part="V1" gate="1" pin="QA"/>
-<wire x1="177.8" y1="48.26" x2="200.66" y2="48.26" width="0.1524" layer="91"/>
-<label x="180.34" y="48.26" size="1.778" layer="95"/>
+<wire x1="185.42" y1="78.74" x2="208.28" y2="78.74" width="0.1524" layer="91"/>
+<label x="187.96" y="78.74" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="A"/>
@@ -1151,8 +1228,8 @@ or will meet your specific requirements.&lt;p&gt;
 <net name="ADC_01_SEL_1" class="0">
 <segment>
 <pinref part="V1" gate="1" pin="QB"/>
-<wire x1="177.8" y1="43.18" x2="200.66" y2="43.18" width="0.1524" layer="91"/>
-<label x="180.34" y="43.18" size="1.778" layer="95"/>
+<wire x1="185.42" y1="73.66" x2="208.28" y2="73.66" width="0.1524" layer="91"/>
+<label x="187.96" y="73.66" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U1" gate="G$1" pin="B"/>
@@ -1168,8 +1245,8 @@ or will meet your specific requirements.&lt;p&gt;
 <net name="ADC_01_SEL_2" class="0">
 <segment>
 <pinref part="V1" gate="1" pin="QC"/>
-<wire x1="177.8" y1="38.1" x2="200.66" y2="38.1" width="0.1524" layer="91"/>
-<label x="180.34" y="38.1" size="1.778" layer="95"/>
+<wire x1="185.42" y1="68.58" x2="208.28" y2="68.58" width="0.1524" layer="91"/>
+<label x="187.96" y="68.58" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U6" gate="G$1" pin="A"/>
@@ -1181,8 +1258,8 @@ or will meet your specific requirements.&lt;p&gt;
 <net name="ADC_23_SEL_0" class="0">
 <segment>
 <pinref part="V2" gate="1" pin="QA"/>
-<wire x1="177.8" y1="-22.86" x2="203.2" y2="-22.86" width="0.1524" layer="91"/>
-<label x="180.34" y="-22.86" size="1.778" layer="95"/>
+<wire x1="185.42" y1="7.62" x2="210.82" y2="7.62" width="0.1524" layer="91"/>
+<label x="187.96" y="7.62" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U4" gate="G$1" pin="A"/>
@@ -1198,8 +1275,8 @@ or will meet your specific requirements.&lt;p&gt;
 <net name="ADC_23_SEL_1" class="0">
 <segment>
 <pinref part="V2" gate="1" pin="QB"/>
-<wire x1="177.8" y1="-27.94" x2="203.2" y2="-27.94" width="0.1524" layer="91"/>
-<label x="180.34" y="-27.94" size="1.778" layer="95"/>
+<wire x1="185.42" y1="2.54" x2="210.82" y2="2.54" width="0.1524" layer="91"/>
+<label x="187.96" y="2.54" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U4" gate="G$1" pin="B"/>
@@ -1215,8 +1292,8 @@ or will meet your specific requirements.&lt;p&gt;
 <net name="ADC_23_SEL_2" class="0">
 <segment>
 <pinref part="V2" gate="1" pin="QC"/>
-<wire x1="177.8" y1="-33.02" x2="203.2" y2="-33.02" width="0.1524" layer="91"/>
-<label x="180.34" y="-33.02" size="1.778" layer="95"/>
+<wire x1="185.42" y1="-2.54" x2="210.82" y2="-2.54" width="0.1524" layer="91"/>
+<label x="187.96" y="-2.54" size="1.778" layer="95"/>
 </segment>
 <segment>
 <pinref part="U7" gate="G$1" pin="A"/>
