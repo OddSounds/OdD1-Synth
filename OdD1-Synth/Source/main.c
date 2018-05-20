@@ -11,9 +11,9 @@ int main(void)
 {
 	ADC_Init();
 	SPI_Init();
-	Osc_Init();
-	
 	UART_begin(115200);
+	
+	Osc_Init();
 	
 	sei();
 	

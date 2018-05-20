@@ -18,6 +18,8 @@ void l_NoiseUpdate()
 void Osc_Init()
 {
 	//Set oscillator outputs
+	sbi(DDRD, PORTD6); //OSC0A
+	sbi(DDRD, PORTD5); //Just used for timing
 	
 	//Initialize oscillators
 	osc1.note = osc2.note = 44;
@@ -26,65 +28,76 @@ void Osc_Init()
 	osc1.phase = 0;
 	osc2.phase = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
+	osc1.index = byte_addr(osc1.phaseaccum, 2);
+	osc2.index = byte_addr(osc2.phaseaccum, 2);
 	
 	// Timer2 PWM Mode set to Phase Correct PWM
-	cbi (TCCR2A, COM2A0);  // clear Compare Match
-	sbi (TCCR2A, COM2A1);
+	cbi (TCCR0A, COM0A0);  // clear Compare Match
+	sbi (TCCR0A, COM0A1);
 
-	sbi (TCCR2A, WGM20);  // Mode 1  / Phase Correct PWM
-	cbi (TCCR2A, WGM21);
-	cbi (TCCR2B, WGM22);
+	sbi (TCCR0A, WGM00);  // Mode 1  / Phase Correct PWM
+	cbi (TCCR0A, WGM01);
+	cbi (TCCR0B, WGM02);
 	
-	sbi (TIMSK2,TOIE2);	
+	sbi (TIMSK0,TOIE0);	
 	
 	//Start the timer
-	// Timer2 Clock Prescaler to : 1
-	sbi (TCCR2B, CS20);
-	cbi (TCCR2B, CS21);
-	cbi (TCCR2B, CS22);	
+	// Timer0 Clock Prescaler to : 1
+	sbi (TCCR0B, CS00);
+	cbi (TCCR0B, CS01);
+	cbi (TCCR0B, CS02);	
 }
 
 //230 cycles
-ISR(TIMER2_OVF_vect)
+ISR(TIMER0_OVF_vect)
 {
-	uint16_t osc1Out, osc2Out, fraction, whole;
-	int16_t mixOut;
+	uint16_t osc1Out, osc2Out;
+	uint16_t fraction, whole, bias;
+	int16_t mixOut, osc1Scalar, osc2Scalar;
+	sbi(PORTD, PORTD5);
 	
 	osc1Out = osc2Out = mixOut = 0;
 	
 	osc1.phaseaccum += osc1.tuningword;
 	osc2.phaseaccum += osc2.tuningword;
 	
-	//Grab the wave
-	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*byte_addr(osc1.phaseaccum, 2) + osc1.phase));
-	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*byte_addr(osc2.phaseaccum, 2) + osc2.phase + SUB_PHASE_SHIFT));
+	//Maybe don't do this here
+	osc1.waveform = *byte_addr(AnalogReading[ANALOG_OSC1_WAVEFORM], 1);
+	osc2.waveform = *byte_addr(AnalogReading[ANALOG_OSC2_WAVEFORM], 1);
+	osc1Scalar = AnalogReading[ANALOG_OSC1_DUTY_CYCLE] >> 1;
+	osc2Scalar = AnalogReading[ANALOG_OSC2_DUTY_CYCLE] >> 1;
 	
-	/*fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
+	//Grab the wave
+	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*osc1.index + osc1.phase));
+	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*osc2.index + osc2.phase));
+	
+	//Scale each oscillator
+	fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
 	whole = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 1);
 	osc1Out = *byte_addr(fraction, 1);
 	osc1Out += *byte_addr(whole, 0);
-	if(osc1Scalar < osc2Scalar)
-		osc1Out += bias;
 	
 	fraction = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 0);
 	whole = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 1);
 	osc2Out = *byte_addr(fraction, 1);
 	osc2Out += *byte_addr(whole, 0);
-	if(osc2Scalar < osc1Scalar)
-		osc2Out += bias;*/
 	
 	//Mix the signals
 	mixOut = osc1Out;
-	mixOut -= osc2Out;
-	mixOut >>= 1; //Divide by 2
-	
-	if(mixOut < -128)
-		mixOut = -128;
-	else if(mixOut > 128)
-		mixOut = 128;
+	mixOut -= (osc1Scalar >> 1) - 1; //Offset
+	mixOut += osc2Out;
+	mixOut -= (osc2Scalar >> 1) - 1; //Offset
+
+	//Hard clip
+	if(mixOut > 128)
+		mixOut = 127;
+	else if(mixOut < -127)
+		mixOut = -127;
 		
-	*byte_addr(mixOut, 0) += 0x80;
+	//Restore offset
+	mixOut += 0x7F;
 	
-	OCR2A = *byte_addr(mixOut, 0);
-	OCR2B = 0;
+	OCR0A = *byte_addr(mixOut, 0);
+	
+	cbi(PORTD, PORTD5);
 }
