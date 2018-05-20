@@ -87,6 +87,7 @@ ISR(TIMER0_OVF_vect)
 	mixOut -= (osc1Scalar >> 1) - 1; //Offset
 	mixOut += osc2Out;
 	mixOut -= (osc2Scalar >> 1) - 1; //Offset
+	mixOut >>= 1;
 
 	//Hard clip
 	if(mixOut > 128)
