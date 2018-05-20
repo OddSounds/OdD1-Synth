@@ -8,8 +8,6 @@
 
 int main(void)
 {
-	unsigned char i;
-	
 	ADC_Init();
 	SPI_Init();
 	
