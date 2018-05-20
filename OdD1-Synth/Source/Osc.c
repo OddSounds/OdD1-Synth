@@ -4,7 +4,7 @@
 #include "WaveTables.h"
 #include <stdlib.h>
 
-uint8_t oscsync = 0;
+uint8_t oscsync = 1;
 volatile osc_t osc1, osc2;
 
 #define byte_addr(v, o)		((uint8_t*)&v + o)
@@ -59,7 +59,14 @@ ISR(TIMER0_OVF_vect)
 	osc1Out = osc2Out = mixOut = 0;
 	
 	osc1.phaseaccum += osc1.tuningword;
-	osc2.phaseaccum += osc2.tuningword;
+	
+	if(oscsync && *byte_addr(osc1.phaseaccum, 3))
+	{
+		osc2.phaseaccum = osc1.phaseaccum;
+		*byte_addr(osc1.phaseaccum, 3) = 0;
+	}
+	else
+		osc2.phaseaccum += osc2.tuningword;
 	
 	//Maybe don't do this here
 	osc1.waveform = *byte_addr(AnalogReading[ANALOG_OSC1_WAVEFORM], 1);
