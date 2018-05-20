@@ -4,8 +4,6 @@
 #include "WaveTables.h"
 #include <stdlib.h>
 
-extern uint16_t* AnalogReading;
-
 uint8_t oscsync = 0;
 volatile osc_t osc1, osc2;
 
@@ -61,7 +59,7 @@ ISR(TIMER2_OVF_vect)
 	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*byte_addr(osc1.phaseaccum, 2) + osc1.phase));
 	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*byte_addr(osc2.phaseaccum, 2) + osc2.phase + SUB_PHASE_SHIFT));
 	
-	fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
+	/*fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
 	whole = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 1);
 	osc1Out = *byte_addr(fraction, 1);
 	osc1Out += *byte_addr(whole, 0);
@@ -73,7 +71,7 @@ ISR(TIMER2_OVF_vect)
 	osc2Out = *byte_addr(fraction, 1);
 	osc2Out += *byte_addr(whole, 0);
 	if(osc2Scalar < osc1Scalar)
-		osc2Out += bias;
+		osc2Out += bias;*/
 	
 	//Mix the signals
 	mixOut = osc1Out;
