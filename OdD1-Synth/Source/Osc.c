@@ -48,13 +48,13 @@ void Osc_Init()
 	cbi (TCCR0B, CS02);	
 }
 
-//230 cycles
+//46% used. Aiming for 80% MAXIMUM
 ISR(TIMER0_OVF_vect)
 {
 	uint16_t osc1Out, osc2Out;
-	uint16_t fraction, whole, bias;
+	uint16_t fraction, whole;
 	int16_t mixOut, osc1Scalar, osc2Scalar;
-	sbi(PORTD, PORTD5);
+	sbi(PORTD, PORTD5); //Timing start
 	
 	osc1Out = osc2Out = mixOut = 0;
 	
@@ -100,5 +100,5 @@ ISR(TIMER0_OVF_vect)
 	
 	OCR0A = *byte_addr(mixOut, 0);
 	
-	cbi(PORTD, PORTD5);
+	cbi(PORTD, PORTD5); //Timing stop
 }
