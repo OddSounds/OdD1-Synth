@@ -1,8 +1,11 @@
 #include "PinDefs.h"
 
+#include <util/delay.h>
+
 #include "ADC.h"
 #include "Osc.h"
 #include "SPI.h"
+#include "UART.h"
 
 int main(void)
 {
@@ -13,10 +16,12 @@ int main(void)
 	
 	sei();
 	
+	UART_begin(115200);
+	
     while (1) 
     {
 		ADC_Update();
-		ADC_UpdateMux();
+		ADC_UpdateMux();		
     }
 }
 

@@ -11,3 +11,11 @@ OdD1-Synth/Debug/makedep.mk
 OdD1-Synth/Debug/Makefile
 *.o
 *.d
+*.epf
+*.s##
+*.s##
+*.s#1
+OdD1/untitled.s#1
+OdD1/untitled.s##
+OdD1/untitled.s#3
+.vs/OdD1-Synth/v14/.atsuo

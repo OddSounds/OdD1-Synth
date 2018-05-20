@@ -1,4 +1,5 @@
 #include "ADC.h"
+#include "UART.h"
 #include <string.h>
 #include <stdlib.h>
 
@@ -12,12 +13,10 @@ OnADCChange ADCChangeHandler[TOTAL_ANALOG_READINGS];
 
 pin_t ADC01Clk = {&PORTC, PORTC4};
 pin_t ADC23Clk = {&PORTC, PORTC5};
-pin_t ADCMuxReset = {&PORTC, PORTC6};
+pin_t ADCMuxReset = {&PORTD, PORTD7};
 
 void l_ADCReset()
 {
-	CurrentChannel = 0;
-	
 	Current01MuxChannel = Next01MuxChannel = 0;
 	Current23MuxChannel = Next23MuxChannel = 0;
 	
@@ -50,15 +49,23 @@ void ADC_Init()
 	//Setup ADC
 	ADMUX = 0; //ADC0 mux input, left adjust
 	sbi(ADMUX, REFS0); //AVCC Reference
-	sbi(ADCSRA, ADPS2); //Div 16
+	sbi(ADCSRA, ADPS2); 
+	sbi(ADCSRA, ADPS1); 
+	sbi(ADCSRA, ADPS0); //Div 128
 	sbi(ADCSRA, ADEN); //Enable ADC
 	DIDR0 = (1 << ADC0D) | (1 << ADC1D) | (1 << ADC2D) | (1 << ADC3D); //Disable digital input A0, A1, A2, A3
 	
 	memset(ADCChangeHandler, 0, sizeof(ADCChangeHandler));
 	memset(AnalogReading, 0x0F, sizeof(AnalogReading));
 	
+	//Setup pins
+	sbi(DDRC, PORTC4);
+	sbi(DDRC, PORTC5);
+	sbi(DDRD, PORTD7);
+	
 	//Set the MUX
 	l_ADCReset();
+	CurrentChannel = 0; //Needs to be reset independently to read into the invalid index
 	
 	//Start first conversion
 	sbi(ADCSRA, ADSC);
@@ -69,10 +76,9 @@ void ADC_Update()
 	//Is conversion ready?
 	if(!(ADCSRA & (1 << ADSC)))
 	{
-		uint16_t newreading;
-		
-		*((uint8_t*)&newreading) = ADCL;
-		*((uint8_t*)&newreading + 1) = ADCH;
+		uint16_t newreading = 0;
+	
+		newreading = ADC;
 		
 		if(ADCChangeHandler[CurrentChannel] && abs(AnalogReading[CurrentChannel] - newreading) > MIN_ADC_CHANGE)
 			ADCChangeHandler[CurrentChannel](newreading);
