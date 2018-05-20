@@ -18,9 +18,7 @@ int main(void)
     while (1) 
     {
 		ADC_Update();
-		ADC_UpdateMux();
-		
-		_delay_ms(1000);
+		ADC_UpdateMux();		
     }
 }
 

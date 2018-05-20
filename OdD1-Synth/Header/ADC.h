@@ -38,6 +38,8 @@ typedef enum
 	TOTAL_ANALOG_READINGS //This many - 1
 }ANALOG_READING;
 
+extern uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
+
 void ADC_Init();
 
 void ADC_Update();
