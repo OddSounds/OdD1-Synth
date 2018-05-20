@@ -1,5 +1,7 @@
 #include "PinDefs.h"
 
+#include <util/delay.h>
+
 #include "ADC.h"
 #include "SPI.h"
 #include "UART.h"
@@ -18,8 +20,7 @@ int main(void)
 		ADC_Update();
 		ADC_UpdateMux();
 		
-		if(UART_count())
-			UART_putc(UART_getc());
+		_delay_ms(1000);
     }
 }
 

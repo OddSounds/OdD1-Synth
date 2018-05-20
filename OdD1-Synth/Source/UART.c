@@ -109,25 +109,28 @@ void UART_putn(int n)
 	
 	memset(numstr, 0, sizeof(numstr));
 	
-	if(n < 0)
+	if(n)
+	{
+		if(n < 0)
 		sign = 1;
-	
-	n = abs(n);
-	
-	while(n > 0)
-	{
-		numstr[index] = (char)(n % 10) + '0';
-		n /= 10;
-		index--;
+		
+		n = abs(n);
+		while(n > 0)
+		{
+			numstr[index] = (char)(n % 10) + '0';
+			n /= 10;
+			index--;
+		}
+		
+		if(sign)
+		{
+			numstr[index] = '-';
+			index--;
+		}
+		UART_puts(numstr + index + 1, 10 - (index + 1));
 	}
-	
-	if(sign)
-	{
-		numstr[index] = '-';
-		index--;
-	}
-	
-	UART_puts(numstr + index + 1, 10 - (index + 1));
+	else
+		UART_putc('0');
 }
 //TX Functions End
 
