@@ -2,8 +2,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define sbi(port,bit)	(port) |= (1 << (bit))
-#define cbi(port,bit)	(port) &= ~(1 << (bit))
+#define BAUD	115200
+#define MYUBRR	F_CPU/16/BAUD-1
 
 #define pushq(q, qIndex, qCount, qSize, v)	\
 {											\
@@ -30,30 +30,30 @@
 }											\
 
 
-volatile char RXBuffer[UART_CHANNELS][UART_RX_BUFFER_SIZE];
-volatile unsigned int rxin[UART_CHANNELS], rxout[UART_CHANNELS], rxcount[UART_CHANNELS];
-volatile unsigned char rxchannel;
+volatile char RXBuffer[UART_RX_BUFFER_SIZE];
+volatile unsigned int rxin, rxout, rxcount;
 
-volatile char TXBuffer[UART_CHANNELS][UART_TX_BUFFER_SIZE];
-volatile unsigned int txin[UART_CHANNELS], txout[UART_CHANNELS], txcount[UART_CHANNELS];
-volatile unsigned char txchannel;
+volatile char TXBuffer[UART_TX_BUFFER_SIZE];
+volatile unsigned int txin, txout, txcount;
 
 void UART_begin(unsigned long baud)
 {
-	unsigned long ubrr = F_CPU/16/baud;
+	uint16_t ubrr = (F_CPU / 4 / baud - 1) / 2;
+	sbi(UCSR0A, U2X0);
+	
+	if(ubrr > 4095)
+	{
+		ubrr = (F_CPU / 8 / baud - 1) / 2;
+		cbi(UCSR0A, U2X0);
+	}
+	
 	UBRR0H = (unsigned char)(ubrr >> 8);
 	UBRR0L = (unsigned char)(ubrr);
 	
-	memset(rxin, 0, sizeof(rxin));
-	memset(rxout, 0, sizeof(rxout));
-	memset(rxcount, 0, sizeof(rxcount));
+	UART_flush();
 	
-	memset(txin, 0, sizeof(txin));
-	memset(txout, 0, sizeof(txout));
-	memset(txcount, 0, sizeof(txcount));
-	
-	txchannel = 0;
-	rxchannel = 0;
+	cbi(DDRD, PORTD0);
+	sbi(DDRD, PORTD1);
 	
 	sbi(UCSR0B, TXCIE0);
 	sbi(UCSR0B, RXCIE0);
@@ -65,7 +65,7 @@ void UART_begin(unsigned long baud)
 
 void UART_end()
 {
-	while(txcount[txchannel] > 0 || !(UCSR0A & (1 << UDRE0)))
+	while(txcount > 0 || !(UCSR0A & (1 << UDRE0)))
 	{
 		__asm("nop");
 	}
@@ -78,37 +78,31 @@ void UART_end()
 }
 
 //TX Functions Start
-void UART_putc(char c, unsigned char channel)
+void UART_putc(char c)
 {
 	cbi(UCSR0B, TXCIE0);
-	pushq(TXBuffer[channel], txin[channel], txcount[channel], UART_TX_BUFFER_SIZE, c);
+	pushq(TXBuffer, txin, txcount, UART_TX_BUFFER_SIZE, c);
 	sbi(UCSR0B, TXCIE0);
 	
 	//Prime the pump
 	if(UCSR0A & (1 << UDRE0))
-	{
-		txchannel = channel;
-		popq(TXBuffer[channel], txout[channel], txcount[channel], UART_TX_BUFFER_SIZE, UDR0);
-	}
+		popq(TXBuffer, txout, txcount, UART_TX_BUFFER_SIZE, UDR0);
 }
 
-void UART_puts(char* s, unsigned int len, unsigned char channel)
+void UART_puts(char* s, unsigned int len)
 {
 	unsigned int i;
 	
 	cbi(UCSR0B, TXCIE0);
-	for(i = 0; i < len && txcount[channel] < UART_TX_BUFFER_SIZE; i++)
-	pushq(TXBuffer[channel], txin[channel], txcount[channel], UART_TX_BUFFER_SIZE, s[i]);
+	for(i = 0; i < len && txcount < UART_TX_BUFFER_SIZE; i++)
+		pushq(TXBuffer, txin, txcount, UART_TX_BUFFER_SIZE, s[i]);
 	sbi(UCSR0B, TXCIE0);
 
 	if(UCSR0A & (1 << UDRE0))
-	{
-		txchannel = channel;
-		popq(TXBuffer[channel], txout[channel], txcount[channel], UART_TX_BUFFER_SIZE, UDR0);
-	}
+		popq(TXBuffer, txout, txcount, UART_TX_BUFFER_SIZE, UDR0);
 }
 
-void UART_putn(int n, unsigned char channel)
+void UART_putn(int n)
 {
 	char numstr[10], sign = 0;
 	char index = 9;
@@ -133,65 +127,59 @@ void UART_putn(int n, unsigned char channel)
 		index--;
 	}
 	
-	UART_puts(numstr + index + 1, 10 - (index + 1), channel);
+	UART_puts(numstr + index + 1, 10 - (index + 1));
 }
 //TX Functions End
 
 //RX Functions Start
-unsigned int UART_count(unsigned char channel)
+unsigned int UART_count()
 {
-	return rxcount[channel];
+	unsigned char ret = 0;
+	
+	cbi(UCSR0B, RXCIE0);
+	ret = rxcount;
+	sbi(UCSR0B, RXCIE0);
+	
+	return ret;
 }
 
-char UART_getc(unsigned char channel)
+char UART_getc()
 {
 	char c = 0xFF;
-	popq(RXBuffer[channel], rxout[channel], rxcount[channel], UART_RX_BUFFER_SIZE, c);
+	
+	cbi(UCSR0B, RXCIE0);
+	popq(RXBuffer, rxout, rxcount, UART_RX_BUFFER_SIZE, c);
+	sbi(UCSR0B, RXCIE0);
 	
 	return c;
 }
 
-void UART_gets(char* s, unsigned int len, unsigned char channel)
+void UART_gets(char* s, unsigned int len)
 {
 	unsigned int i;
 	
+	cbi(UCSR0B, RXCIE0);
 	for(i = 0; i < len && rxcount > 0; i++)
-	popq(RXBuffer[channel], rxout[channel], rxcount[channel], UART_RX_BUFFER_SIZE, s[i]);
+		popq(RXBuffer, rxout, rxcount, UART_RX_BUFFER_SIZE, s[i]);
+	sbi(UCSR0B, RXCIE0);	
 }
 //RX Functions End
 
 //Utility Functions Start
 void UART_flush()
 {
-	memset(rxin, 0, sizeof(rxin));
-	memset(rxout, 0, sizeof(rxout));
-	memset(rxcount, 0, sizeof(rxcount));
-	
-	memset(txin, 0, sizeof(txin));
-	memset(txout, 0, sizeof(txout));
-	memset(txcount, 0, sizeof(txcount));
+	rxin = rxout = rxcount = 0;
+	txin = txout = txcount = 0;
 }
 //Utility Functions End
 
 //ISR
 ISR(USART_RX_vect)
 {
-	pushq(RXBuffer[rxchannel], rxin[rxchannel], rxcount[rxchannel], UART_RX_BUFFER_SIZE, UDR0);
+	pushq(RXBuffer, rxin, rxcount, UART_RX_BUFFER_SIZE, UDR0);
 }
 
 ISR(USART_TX_vect)
 {
-	if(UART_CHANNELS > 0)
-	{
-		unsigned char i = txchannel;
-		
-		do
-		{
-			txchannel++;
-			if(txchannel >= UART_CHANNELS)
-			txchannel = 0;
-		}while(i != txchannel && txcount[txchannel] == 0);
-	}
-	
-	popq(TXBuffer[txchannel], txout[txchannel], txcount[txchannel], UART_TX_BUFFER_SIZE, UDR0);
+	popq(TXBuffer, txout, txcount, UART_TX_BUFFER_SIZE, UDR0);
 }

@@ -6,6 +6,8 @@
 
 int main(void)
 {
+	unsigned char i;
+	
 	ADC_Init();
 	SPI_Init();
 	
@@ -15,6 +17,9 @@ int main(void)
     {
 		ADC_Update();
 		ADC_UpdateMux();
+		
+		if(UART_count())
+			UART_putc(UART_getc());
     }
 }
 
