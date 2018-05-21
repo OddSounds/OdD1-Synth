@@ -63,19 +63,42 @@ ISR(TIMER0_OVF_vect)
 	
 	//Maybe don't do this here
 	osc1.waveform = *byte_addr(AnalogReading[ANALOG_OSC1_WAVEFORM], 1);
+	osc1.wavemix = *byte_addr(AnalogReading[ANALOG_OSC1_WAVEFORM], 0);
+	
 	osc2.waveform = *byte_addr(AnalogReading[ANALOG_OSC2_WAVEFORM], 1);
+	osc2.wavemix = *byte_addr(AnalogReading[ANALOG_OSC2_WAVEFORM], 0);
+	
 	osc1Scalar = AnalogReading[ANALOG_OSC1_DUTY_CYCLE] >> 1;
 	osc2Scalar = AnalogReading[ANALOG_OSC2_DUTY_CYCLE] >> 1;
 	
-	//Grab the wave
-	*byte_addr(osc1Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*osc1.index + osc1.phase));
-	*byte_addr(osc2Out, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*osc2.index + osc2.phase));
+	//Grab osc1 waveform
+	//Reusing fraction and whole. Sue me.
+	fraction = whole = 0;
+	*byte_addr(fraction, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*osc1.index + osc1.phase));
+	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform + 1] + (uint8_t)(*osc1.index + osc1.phase));
 	
-	//Scale each oscillator
+	//Mix waveform 1
+	fraction *= (0x0100 - osc1.wavemix);
+	whole *= osc1.wavemix;
+	whole += fraction;
+	*byte_addr(osc1Out, 0) = *byte_addr(whole, 1);
+	
+	//Scale osc1
 	fraction = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 0);
 	whole = *byte_addr(osc1Out, 0) * *byte_addr(osc1Scalar, 1);
 	osc1Out = *byte_addr(fraction, 1);
 	osc1Out += *byte_addr(whole, 0);
+	
+	//Grab osc2 waveform
+	fraction = whole = 0;
+	*byte_addr(fraction, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*osc2.index + osc2.phase));
+	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform + 1] + (uint8_t)(*osc2.index + osc2.phase));
+	
+	//Mix waveform 2
+	fraction *= (0x0100 - osc2.wavemix);
+	whole *= osc2.wavemix;
+	whole += fraction;
+	*byte_addr(osc2Out, 0) = *byte_addr(whole, 1);	
 	
 	fraction = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 0);
 	whole = *byte_addr(osc2Out, 0) * *byte_addr(osc2Scalar, 1);
