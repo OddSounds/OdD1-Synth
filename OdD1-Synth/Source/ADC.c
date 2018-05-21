@@ -7,8 +7,6 @@ uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
 uint8_t CurrentChannel;
 uint8_t Current01MuxChannel, Next01MuxChannel, Current23MuxChannel, Next23MuxChannel;
 
-typedef void (*OnADCChange)(uint16_t);
-
 OnADCChange ADCChangeHandler[TOTAL_ANALOG_READINGS];
 
 pin_t ADC01Clk = {&PORTC, PORTC4};

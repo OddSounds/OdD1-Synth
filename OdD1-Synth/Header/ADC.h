@@ -6,6 +6,8 @@
 #define NUM_ADC_INPUT	4
 #define MIN_ADC_CHANGE	5
 
+typedef void (*OnADCChange)(uint16_t);
+
 //How many knobs do I need?
 typedef enum
 {
@@ -39,6 +41,7 @@ typedef enum
 }ANALOG_READING;
 
 extern uint16_t AnalogReading[TOTAL_ANALOG_READINGS];
+extern OnADCChange ADCChangeHandler[TOTAL_ANALOG_READINGS];
 
 void ADC_Init();
 

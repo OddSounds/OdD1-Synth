@@ -37,9 +37,16 @@ void Osc_Init()
 	osc1.index = byte_addr(osc1.phaseaccum, 2);
 	osc2.index = byte_addr(osc2.phaseaccum, 2);
 		
+	//Set flags for updating osc on first run
 	NextOsc1LevelReady = NextOsc2LevelReady = 0;
 	NextOsc1WaveReady = NextOsc2WaveReady = 0;
 	
+	//Setup ADC change events
+	ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
+	ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
+	ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeLevel1;
+	ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeLevel2;
+		
 	// Timer2 PWM Mode set to Phase Correct PWM
 	cbi (TCCR0A, COM0A0);  // clear Compare Match
 	sbi (TCCR0A, COM0A1);
@@ -64,7 +71,7 @@ void Osc_ChangeWave1(uint16_t wave)
 	NextOsc1WaveReady = 1;
 }
 
-void Osc_ChangeScale1(uint16_t scale)
+void Osc_ChangeLevel1(uint16_t scale)
 {
 	NextOsc1LevelReady = 0;
 	NextOsc1Level = scale;
@@ -78,7 +85,7 @@ void Osc_ChangeWave2(uint16_t wave)
 	NextOsc2WaveReady = 1;
 }
 
-void Osc_ChangeScale2(uint16_t scale)
+void Osc_ChangeLevel2(uint16_t scale)
 {
 	NextOsc2LevelReady = 0;
 	NextOsc2Level = scale;
@@ -159,8 +166,8 @@ ISR(TIMER0_OVF_vect)
 	if(NextOsc1WaveReady)
 	{
 		osc1.waveform = *byte_addr(NextOsc1Waveform, 1);
-		osc1.wavemix = 0x0100 - *byte_addr(NextOsc1Waveform, 1);
-		osc1.wavemixnext = *byte_addr(NextOsc1Waveform, 1);
+		osc1.wavemix = 255;//0x0100 - *byte_addr(NextOsc1Waveform, 1);
+		osc1.wavemixnext = 0;//*byte_addr(NextOsc1Waveform, 1);
 		NextOsc1WaveReady = 0;
 	}
 	
@@ -173,8 +180,8 @@ ISR(TIMER0_OVF_vect)
 	if(NextOsc2WaveReady)
 	{
 		osc2.waveform = *byte_addr(NextOsc2Waveform, 1);
-		osc2.wavemix = 0x0100 - *byte_addr(NextOsc2Waveform, 1);
-		osc2.wavemixnext = *byte_addr(NextOsc2Waveform, 1);
+		osc2.wavemix = 255;//0x0100 - *byte_addr(NextOsc2Waveform, 1);
+		osc2.wavemixnext = 0;//*byte_addr(NextOsc2Waveform, 1);
 		NextOsc2WaveReady = 0;
 	}	
 	
