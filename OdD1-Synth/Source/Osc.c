@@ -75,7 +75,7 @@ ISR(TIMER0_OVF_vect)
 	//Reusing fraction and whole. Sue me.
 	fraction = whole = 0;
 	*byte_addr(fraction, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform] + (uint8_t)(*osc1.index + osc1.phase));
-	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform + 1] + (uint8_t)(*osc1.index + osc1.phase));
+	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc1.waveform + 1] + (uint8_t)(*osc1.index + osc1.phase + 32));
 	
 	//Mix waveform 1
 	fraction *= (0x0100 - osc1.wavemix);
@@ -92,7 +92,7 @@ ISR(TIMER0_OVF_vect)
 	//Grab osc2 waveform
 	fraction = whole = 0;
 	*byte_addr(fraction, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform] + (uint8_t)(*osc2.index + osc2.phase));
-	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform + 1] + (uint8_t)(*osc2.index + osc2.phase));
+	*byte_addr(whole, 0) = pgm_read_byte(analogWaveTable + waveformOffset[osc2.waveform + 1] + (uint8_t)(*osc2.index + osc2.phase + 32));
 	
 	//Mix waveform 2
 	fraction *= (0x0100 - osc2.wavemix);
