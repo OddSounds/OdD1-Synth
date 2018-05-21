@@ -74,7 +74,7 @@ PROGMEM const char analogWaveTable[]  =
 	63,75,88,101,114,127,
 };
 
-static const int waveformOffset[] = {0, 256, 512, 1024, 768};
+static const int waveformOffset[] = {0, 256, 512, 768, 1024};
 
 #define KEY_OFFSET	10
 
