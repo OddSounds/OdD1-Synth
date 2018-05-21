@@ -8,8 +8,9 @@
 
 typedef struct
 {
-	uint8_t note, waveform, wavemix;
+	uint8_t note, waveform, wavemix, wavemixnext;
 	uint8_t phase;
+	uint16_t level;
 	uint32_t tuningword, phaseaccum;
 	uint8_t* index;
 }osc_t;
