@@ -34,7 +34,8 @@ void Osc_Init()
 	osc1.wavemixnext = osc2.wavemixnext = 0;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = osc2.phase = 0;
-	osc1.level = osc2.level = 0x0140;
+	*((uint16_t*)osc1.level) = 0x0100;
+	*((uint16_t*)osc2.level) = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
 	osc1.index = byte_addr(osc1.phaseaccum, 2);
 	osc2.index = byte_addr(osc2.phaseaccum, 2);
@@ -130,10 +131,10 @@ ISR(TIMER0_OVF_vect)
 	osc1Out[0] = whole[1];
 	
 	//Scale osc1
-	*((uint16_t*)fraction) = osc1Out[0] * *byte_addr(osc1.level, 0);
-	*((uint16_t*)whole) = osc1Out[0] * *byte_addr(osc1.level, 1);
-	*((uint16_t*)osc1Out) = *byte_addr(fraction, 1);
-	*((uint16_t*)osc1Out) += *byte_addr(whole, 0);
+	*((uint16_t*)fraction) = osc1Out[0] * osc1.level[0];
+	*((uint16_t*)whole) = osc1Out[0] * osc1.level[1];
+	*((uint16_t*)osc1Out) = fraction[1];
+	*((uint16_t*)osc1Out) += whole[0];
 	
 	
 	osc2.phaseaccum += osc2.tuningword;
@@ -150,17 +151,17 @@ ISR(TIMER0_OVF_vect)
 	osc2Out[0] = whole[1];
 	
 	//Scale osc2
-	*((uint16_t*)fraction) = osc2Out[0] * *byte_addr(osc2.level, 0);
-	*((uint16_t*)whole) = osc2Out[0] * *byte_addr(osc2.level, 1);
-	*((uint16_t*)osc2Out) = *byte_addr(fraction, 1);
-	*((uint16_t*)osc2Out) += *byte_addr(whole, 0);
+	*((uint16_t*)fraction) = osc2Out[0] * osc2.level[0];
+	*((uint16_t*)whole) = osc2Out[0] * osc2.level[1];
+	*((uint16_t*)osc2Out) = fraction[1];
+	*((uint16_t*)osc2Out) += whole[0];
 	
 	
 	//Mix the signals
 	*((int16_t*)mixOut) = *((uint16_t*)osc1Out);
-	*((int16_t*)mixOut) -= (osc1.level >> 1) - 1; //Offset
+	*((int16_t*)mixOut) -= (*((uint16_t*)osc1.level) >> 1) - 1; //Offset
 	*((int16_t*)mixOut) += *((uint16_t*)osc2Out);
-	*((int16_t*)mixOut) -= (osc2.level >> 1) - 1; //Offset
+	*((int16_t*)mixOut) -= (*((uint16_t*)osc2.level) >> 1) - 1; //Offset
 	*((int16_t*)mixOut) >>= 1;
 
 	//Restore offset
@@ -185,7 +186,7 @@ ISR(TIMER0_OVF_vect)
 	}
 	else if(NextOsc1LevelReady)
 	{
-		osc1.level = *((uint16_t*)NextOsc1Level);
+		*((uint16_t*)osc1.level) = *((uint16_t*)NextOsc1Level);
 		NextOsc1LevelReady = 0;
 	}
 	else if(NextOsc2WaveReady)
@@ -197,7 +198,7 @@ ISR(TIMER0_OVF_vect)
 	}	
 	else if(NextOsc2LevelReady)
 	{
-		osc2.level = *((uint16_t*)NextOsc2Level);
+		*((uint16_t*)osc2.level) = *((uint16_t*)NextOsc2Level);
 		NextOsc2LevelReady = 0;
 	}
 	
