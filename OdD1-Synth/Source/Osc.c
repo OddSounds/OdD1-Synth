@@ -68,30 +68,42 @@ void Osc_Init()
 
 void Osc_ChangeWave1(uint16_t wave)
 {
-	NextOsc1WaveReady = 0;
-	*((uint16_t*)NextOsc1Waveform) = wave;
-	NextOsc1WaveReady = 1;
+	if(*((uint16_t*)NextOsc1Waveform) != wave)
+	{
+		NextOsc1WaveReady = 0;
+		*((uint16_t*)NextOsc1Waveform) = wave;
+		NextOsc1WaveReady = 1;
+	}
 }
 
 void Osc_ChangeLevel1(uint16_t level)
 {
-	NextOsc1LevelReady = 0;
-	*((uint16_t*)NextOsc1Level) = level >> 1;
-	NextOsc1LevelReady = 1;
+	if(*((uint16_t*)NextOsc1Level) != (level >> 1))
+	{
+		NextOsc1LevelReady = 0;
+		*((uint16_t*)NextOsc1Level) = level >> 1;
+		NextOsc1LevelReady = 1;
+	}
 }
 
 void Osc_ChangeWave2(uint16_t wave)
 {
-	NextOsc2WaveReady = 0;
-	*((uint16_t*)NextOsc2Waveform) = wave;
-	NextOsc2WaveReady = 1;
+	if(*((uint16_t*)NextOsc2Waveform) != wave)
+	{
+		NextOsc2WaveReady = 0;
+		*((uint16_t*)NextOsc2Waveform) = wave;
+		NextOsc2WaveReady = 1;
+	}
 }
 
 void Osc_ChangeLevel2(uint16_t level)
 {
-	NextOsc2LevelReady = 0;
-	*((uint16_t*)NextOsc2Level) = level >> 1;
-	NextOsc2LevelReady = 1;	
+	if(*((uint16_t*)NextOsc2Level) != (level >> 1))
+	{
+		NextOsc2LevelReady = 0;
+		*((uint16_t*)NextOsc2Level) = level >> 1;
+		NextOsc2LevelReady = 1;	
+	}
 }
 
 //53% of 510 cycles (LFO/ADSR/NOISE)
