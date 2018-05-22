@@ -10,8 +10,8 @@ volatile osc_t osc1, osc2;
 volatile uint8_t NextOsc1LevelReady, NextOsc2LevelReady;
 volatile uint8_t NextOsc1WaveReady, NextOsc2WaveReady;
 
-uint16_t NextOsc1Waveform, NextOsc2Waveform;
-uint16_t NextOsc1Level, NextOsc2Level;
+uint8_t NextOsc1Waveform[2], NextOsc2Waveform[2];
+uint8_t NextOsc1Level[2], NextOsc2Level[2];
 
 #define byte_addr(v, o)		((uint8_t*)&v + o)
 #define short_addr(v, o)	((uint16_t*)&v + o)
@@ -69,32 +69,32 @@ void Osc_Init()
 void Osc_ChangeWave1(uint16_t wave)
 {
 	NextOsc1WaveReady = 0;
-	NextOsc1Waveform = wave;
+	*((uint16_t*)NextOsc1Waveform) = wave;
 	NextOsc1WaveReady = 1;
 }
 
-void Osc_ChangeLevel1(uint16_t scale)
+void Osc_ChangeLevel1(uint16_t level)
 {
 	NextOsc1LevelReady = 0;
-	NextOsc1Level = scale >> 1;
+	*((uint16_t*)NextOsc1Level) = level >> 1;
 	NextOsc1LevelReady = 1;
 }
 
 void Osc_ChangeWave2(uint16_t wave)
 {
 	NextOsc2WaveReady = 0;
-	NextOsc2Waveform = wave;
+	*((uint16_t*)NextOsc2Waveform) = wave;
 	NextOsc2WaveReady = 1;
 }
 
-void Osc_ChangeLevel2(uint16_t scale)
+void Osc_ChangeLevel2(uint16_t level)
 {
 	NextOsc2LevelReady = 0;
-	NextOsc2Level = scale >> 1;
+	*((uint16_t*)NextOsc2Level) = level >> 1;
 	NextOsc2LevelReady = 1;	
 }
 
-//69% of 510 cycles (LFO/ADSR/NOISE)
+//53% of 510 cycles (LFO/ADSR/NOISE)
 ISR(TIMER0_OVF_vect)
 {
 	uint8_t osc1Out[2], osc2Out[2];
@@ -164,33 +164,31 @@ ISR(TIMER0_OVF_vect)
 	
 	OCR0A = mixOut[0];
 	
-	/*if(NextOsc1WaveReady)
+	//Limit only 1 to be updated per cycle
+	if(NextOsc1WaveReady)
 	{
-		osc1.waveform = *byte_addr(NextOsc1Waveform, 1);
-		osc1.wavemix = ~*byte_addr(NextOsc1Waveform, 0);
-		osc1.wavemixnext = *byte_addr(NextOsc1Waveform, 0);
+		osc1.waveform = NextOsc1Waveform[1];
+		osc1.wavemix = ~NextOsc1Waveform[0];
+		osc1.wavemixnext = NextOsc1Waveform[0];
 		NextOsc1WaveReady = 0;
 	}
-	
-	if(NextOsc1LevelReady)
+	else if(NextOsc1LevelReady)
 	{
-		osc1.level = NextOsc1Level;
+		osc1.level = *((uint16_t*)NextOsc1Level);
 		NextOsc1LevelReady = 0;
 	}
-	
-	if(NextOsc2WaveReady)
+	else if(NextOsc2WaveReady)
 	{
-		osc2.waveform = *byte_addr(NextOsc2Waveform, 1);
-		osc2.wavemix = ~*byte_addr(NextOsc2Waveform, 0);
-		osc2.wavemixnext = *byte_addr(NextOsc2Waveform, 0);
+		osc2.waveform = NextOsc2Waveform[1];
+		osc2.wavemix = ~NextOsc2Waveform[0];
+		osc2.wavemixnext = NextOsc2Waveform[0];
 		NextOsc2WaveReady = 0;
 	}	
-	
-	if(NextOsc2LevelReady)
+	else if(NextOsc2LevelReady)
 	{
-		osc2.level = NextOsc2Level;
+		osc2.level = *((uint16_t*)NextOsc2Level);
 		NextOsc2LevelReady = 0;
-	}*/	
+	}
 	
 	cbi(PORTD, PORTD5); //Timing stop
 }
