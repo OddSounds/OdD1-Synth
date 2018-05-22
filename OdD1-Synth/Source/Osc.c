@@ -5,7 +5,7 @@
 #include <stdlib.h>
 
 uint8_t oscsync = 0;
-volatile osc_t osc1, osc2;
+osc_t osc1, osc2;
 
 volatile uint8_t NextOsc1LevelReady, NextOsc2LevelReady;
 volatile uint8_t NextOsc1WaveReady, NextOsc2WaveReady;
@@ -115,9 +115,7 @@ ISR(TIMER0_OVF_vect)
 	uint32_t mixindex;
 	sbi(PORTD, PORTD5); //Timing start
 	
-	osc1.phaseaccum += osc1.tuningword;
-	osc2.phaseaccum += osc2.tuningword;
-	
+	osc1.phaseaccum += osc1.tuningword;	
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
 	fraction[1] = whole[1] = 0;
@@ -138,6 +136,7 @@ ISR(TIMER0_OVF_vect)
 	*((uint16_t*)osc1Out) += *byte_addr(whole, 0);
 	
 	
+	osc2.phaseaccum += osc2.tuningword;
 	//Grab osc2 waveform
 	fraction[1] = whole[1] = 0;
 	mixindex = (int)analogWaveTable + (uint8_t)(*osc2.index + osc2.phase);
