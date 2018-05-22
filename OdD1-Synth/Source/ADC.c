@@ -74,14 +74,9 @@ void ADC_Update()
 	//Is conversion ready?
 	if(!(ADCSRA & (1 << ADSC)))
 	{
-		uint16_t newreading = 0;
-	
-		newreading = ADC;
-		
-		if(ADCChangeHandler[CurrentChannel] && abs(AnalogReading[CurrentChannel] - newreading) > MIN_ADC_CHANGE)
-			ADCChangeHandler[CurrentChannel](newreading);
-		
-		AnalogReading[CurrentChannel] = newreading;
+		AnalogReading[CurrentChannel] = ADC;
+		if(ADCChangeHandler[CurrentChannel])
+			ADCChangeHandler[CurrentChannel](AnalogReading[CurrentChannel]);
 		
 		CurrentChannel++;
 	

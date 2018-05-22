@@ -20,7 +20,7 @@ int main(void)
     while (1) 
     {
 		ADC_Update();
-		ADC_UpdateMux();		
+		ADC_UpdateMux();
     }
 }
 
