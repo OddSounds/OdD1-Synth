@@ -9,6 +9,7 @@ osc_t osc1, osc2;
 
 volatile uint8_t NextOsc1LevelReady, NextOsc2LevelReady;
 volatile uint8_t NextOsc1WaveReady, NextOsc2WaveReady;
+volatile uint8_t NextOsc1TWordReady, NextOsc2TWordReady;
 
 uint8_t NextOsc1Waveform[2], NextOsc2Waveform[2];
 uint8_t NextOsc1Level[2], NextOsc2Level[2];
@@ -34,6 +35,7 @@ void Osc_Init()
 	osc1.wavemixnext = osc2.wavemixnext = 0;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = osc2.phase = 0;
+	osc1.dutycycle = osc2.dutycycle = 128;
 	*((uint16_t*)osc1.level) = 0x0100;
 	*((uint16_t*)osc2.level) = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
@@ -43,12 +45,13 @@ void Osc_Init()
 	//Setup ADC events
 	ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
 	ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
-	ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeLevel1;
-	ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeLevel2;
+	ADCChangeHandler[ANALOG_OSC1_LEVEL] = Osc_ChangeLevel1;
+	ADCChangeHandler[ANALOG_OSC2_LEVEL] = Osc_ChangeLevel2;
 		
 	//Set flags for updating osc on first run
 	NextOsc1LevelReady = NextOsc2LevelReady = 0;
 	NextOsc1WaveReady = NextOsc2WaveReady = 0;
+	NextOsc1TWordReady = NextOsc2TWordReady = 0;
 		
 	// Timer2 PWM Mode set to Phase Correct PWM
 	cbi (TCCR0A, COM0A0);  // clear Compare Match
