@@ -9,7 +9,7 @@
 typedef struct
 {
 	uint8_t note, waveform, wavemix, wavemixnext;
-	uint8_t phase;
+	uint8_t phase, duty;
 	uint8_t level[2];
 	uint32_t tuningword, phaseaccum;
 	uint8_t* index;

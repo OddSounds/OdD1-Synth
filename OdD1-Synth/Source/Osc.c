@@ -34,6 +34,7 @@ void Osc_Init()
 	osc1.wavemixnext = osc2.wavemixnext = 0;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = osc2.phase = 0;
+	osc1.duty = osc2.duty = 128;
 	*((uint16_t*)osc1.level) = 0x0100;
 	*((uint16_t*)osc2.level) = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
