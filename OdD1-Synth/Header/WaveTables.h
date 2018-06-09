@@ -2,6 +2,7 @@
 #define WAVETABLES_H_
 
 #include <avr/pgmspace.h>
+#include <stdint-gcc.h>
 
 enum
 {
@@ -13,7 +14,7 @@ enum
 	NUM_WAVE
 }WAVE_TYPE;
 
-PROGMEM const char analogWaveTable[]  = 
+PROGMEM const uint16_t analogWaveTable[]  = 
 {
 	//sine wave
 	127,130,133,136,139,143,146,149,152,155,158,161,164,167,170,173,176,178,181,184,187,190,192,195,198,200,203,205,208,
@@ -74,7 +75,7 @@ PROGMEM const char analogWaveTable[]  =
 	63,75,88,101,114,127,
 };
 
-static const int waveformOffset[] = {0, 256, 512, 768, 1024};
+static const uint16_t waveformOffset[] = {0, 256, 512, 768, 1024};
 
 #define KEY_OFFSET	10
 

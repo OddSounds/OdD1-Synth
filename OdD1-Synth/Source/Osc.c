@@ -50,21 +50,12 @@ void Osc_Init()
 	NextOsc1LevelReady = NextOsc2LevelReady = 0;
 	NextOsc1WaveReady = NextOsc2WaveReady = 0;
 		
-	// Timer2 PWM Mode set to Phase Correct PWM
-	cbi (TCCR0A, COM0A0);  // clear Compare Match
-	sbi (TCCR0A, COM0A1);
-
-	sbi (TCCR0A, WGM00);  // Mode 1  / Phase Correct PWM
-	cbi (TCCR0A, WGM01);
-	cbi (TCCR0B, WGM02);
+	// Timer1 PWM Mode set to fast PWM 9-bit
+	TCCR1A = (1 << COM1A1) | (1 << COM1B1) | (1 << WGM11);
+	TCCR1B = (1 << WGM12);
+	TIMSK1 = (1 << TOIE1);
 	
-	sbi (TIMSK0,TOIE0);	
-	
-	//Start the timer
-	// Timer0 Clock Prescaler to : 1
-	sbi (TCCR0B, CS00);
-	cbi (TCCR0B, CS01);
-	cbi (TCCR0B, CS02);	
+	sbi(TCCR1B, CS10);
 }
 
 void Osc_ChangeWave1(uint16_t wave)
@@ -108,7 +99,7 @@ void Osc_ChangeLevel2(uint16_t level)
 }
 
 //53% of 510 cycles (LFO/ADSR/NOISE)
-ISR(TIMER0_OVF_vect)
+ISR(TIMER1_OVF_vect)
 {
 	uint8_t osc1Out[2], osc2Out[2];
 	uint8_t fraction[2], whole[2];
@@ -130,12 +121,6 @@ ISR(TIMER0_OVF_vect)
 	*((uint16_t*)whole) += *((uint16_t*)fraction);
 	osc1Out[0] = whole[1];
 	
-	//Scale osc1
-	*((uint16_t*)fraction) = osc1Out[0] * osc1.level[0];
-	*((uint16_t*)whole) = osc1Out[0] * osc1.level[1];
-	*((uint16_t*)osc1Out) = fraction[1];
-	*((uint16_t*)osc1Out) += whole[0];
-	
 	
 	osc2.phaseaccum += osc2.tuningword;
 	//Grab osc2 waveform
@@ -150,29 +135,6 @@ ISR(TIMER0_OVF_vect)
 	*((uint16_t*)whole) += *((uint16_t*)fraction);
 	osc2Out[0] = whole[1];
 	
-	//Scale osc2
-	*((uint16_t*)fraction) = osc2Out[0] * osc2.level[0];
-	*((uint16_t*)whole) = osc2Out[0] * osc2.level[1];
-	*((uint16_t*)osc2Out) = fraction[1];
-	*((uint16_t*)osc2Out) += whole[0];
-	
-	
-	//Mix the signals
-	*((int16_t*)mixOut) = *((uint16_t*)osc1Out);
-	*((int16_t*)mixOut) -= (*((uint16_t*)osc1.level) >> 1) - 1; //Offset
-	*((int16_t*)mixOut) += *((uint16_t*)osc2Out);
-	*((int16_t*)mixOut) -= (*((uint16_t*)osc2.level) >> 1) - 1; //Offset
-	*((int16_t*)mixOut) >>= 1;
-
-	//Restore offset
-	*((int16_t*)mixOut) += 0x7F;
-
-	//Hard clip
-	//Better way?
-	if(*((int16_t*)mixOut) > 0xFF)
-		mixOut[0] = 0xFF;
-	else if(*((int16_t*)mixOut) < 0)
-		mixOut[0] = 0;
 	
 	OCR0A = mixOut[0];
 	
