@@ -9,7 +9,8 @@
 typedef struct
 {
 	uint8_t note, waveform, wavemix, wavemixnext;
-	uint8_t phase, duty, skip;
+	uint8_t phase, duty;
+	int8_t skip;
 	uint8_t level[2];
 	uint32_t tuningword, phaseaccum;
 	uint8_t* index;
@@ -24,7 +25,7 @@ void Osc_ChangeLevel1(uint16_t scale);
 void Osc_ChangeWave2(uint16_t wave);
 void Osc_ChangeLevel2(uint16_t scale);
 
-void Osc_ChangeDuty1(uint8_t duty);
-void Osc_ChangeDuty2(uint8_t duty);
+void Osc_ChangeDuty1(uint16_t duty);
+void Osc_ChangeDuty2(uint16_t duty);
 
 #endif /* OSC_H_ */
