@@ -24,11 +24,11 @@ void l_NoiseUpdate()
 void Osc_Init()
 {
 	//Set oscillator outputs
-	sbi(DDRD, PORTD6); //OSC0A
+	sbi(DDRB, PORTB1); //OSC0A
 	sbi(DDRD, PORTD5); //Just used for timing
 	
 	//Initialize oscillators
-	osc1.note = osc2.note = 44;
+	osc1.note = osc2.note = 50;
 	osc1.waveform = osc2.waveform = WAVE_SINE;
 	osc1.wavemix = osc2.wavemix = 255;
 	osc1.wavemixnext = osc2.wavemixnext = 0;
@@ -36,7 +36,7 @@ void Osc_Init()
 	osc1.phase = osc2.phase = 0;
 	*((uint16_t*)osc1.level) = 0x0100;
 	*((uint16_t*)osc2.level) = 0;
-	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
+	osc1.tuningword = osc2.tuningword = 0x010000;
 	osc1.index = byte_addr(osc1.phaseaccum, 2);
 	osc2.index = byte_addr(osc2.phaseaccum, 2);
 	
@@ -101,16 +101,20 @@ void Osc_ChangeLevel2(uint16_t level)
 //53% of 510 cycles (LFO/ADSR/NOISE)
 ISR(TIMER1_OVF_vect)
 {
-	uint8_t osc1Out[2], osc2Out[2];
+	uint16_t osc1out;
+	uint16_t index;
+	/*uint8_t osc1Out[2], osc2Out[2];
 	uint8_t fraction[2], whole[2];
 	uint8_t mixOut[2];
-	uint32_t mixindex;
+	uint32_t mixindex;*/
 	sbi(PORTD, PORTD5); //Timing start
 	
 	osc1.phaseaccum += osc1.tuningword;	
+	index = *((uint16_t*)&osc1.phaseaccum + 1) & 0x01FF;
+	osc1out = pgm_read_word(analogWaveTable + index);
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
-	fraction[1] = whole[1] = 0;
+	/*fraction[1] = whole[1] = 0;
 	mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase);
 	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform]);
 	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform + 1]);
@@ -133,10 +137,9 @@ ISR(TIMER1_OVF_vect)
 	*((uint16_t*)fraction) *= osc2.wavemix;
 	*((uint16_t*)whole) *= osc2.wavemixnext;
 	*((uint16_t*)whole) += *((uint16_t*)fraction);
-	osc2Out[0] = whole[1];
+	osc2Out[0] = whole[1];*/
 	
-	
-	OCR0A = mixOut[0];
+	OCR1A = osc1out;
 	
 	//Limit only 1 to be updated per cycle
 	if(NextOsc1WaveReady)
