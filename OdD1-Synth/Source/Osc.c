@@ -145,13 +145,7 @@ ISR(TIMER0_OVF_vect)
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
 	fraction[1] = whole[1] = 0;
-	if(*osc1.index < 128 && osc1.duty > 128)
-		mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase + osc1.skip);
-	else if(*osc1.index > 127 && osc1.duty < 128)
-		mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase - osc1.skip);
-	else
-		mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase);
-		
+	mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase);
 	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform]);
 	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform + 1]);
 	
