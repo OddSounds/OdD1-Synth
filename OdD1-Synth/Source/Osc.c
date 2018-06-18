@@ -36,8 +36,7 @@ void Osc_Init()
 	osc1.wavemixnext = osc2.wavemixnext = 0;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = osc2.phase = 0;
-	osc1.duty = osc2.duty = 64;
-	osc1.skip = osc2.skip = -64;
+	osc1.duty = osc2.duty = 128;
 	*((uint16_t*)osc1.level) = 0x01FF;
 	*((uint16_t*)osc2.level) = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
@@ -47,8 +46,8 @@ void Osc_Init()
 	//Setup ADC events
 	ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
 	ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
-	//ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeDuty1;
-	//ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeDuty2;
+	ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeDuty1;
+	ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeDuty2;
 		
 	//Set flags for updating osc on first run
 	NextOsc1LevelReady = NextOsc2LevelReady = 0;
@@ -145,7 +144,7 @@ ISR(TIMER0_OVF_vect)
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
 	fraction[1] = whole[1] = 0;
-	mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase);
+	mixindex = (int)analogWaveTable + pgm_read_byte(DutyIndex[osc1.duty] + (uint8_t)(*osc1.index + osc1.phase));
 	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform]);
 	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform + 1]);
 	
@@ -212,7 +211,6 @@ ISR(TIMER0_OVF_vect)
 	else if(NextOsc1DutyReady)
 	{
 		osc1.duty = NextOsc1Duty;
-		osc1.skip = 128 - osc1.duty;
 		NextOsc1DutyReady = 0;
 	}
 	else if(NextOsc1LevelReady)
@@ -230,7 +228,6 @@ ISR(TIMER0_OVF_vect)
 	else if(NextOsc2DutyReady)
 	{
 		osc2.duty = NextOsc2Duty;
-		osc2.skip = 128 - osc2.duty;
 		NextOsc2DutyReady = 0;
 	}	
 	else if(NextOsc2LevelReady)
