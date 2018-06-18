@@ -36,7 +36,7 @@ void Osc_Init()
 	osc1.wavemixnext = osc2.wavemixnext = 0;
 	osc1.phaseaccum = osc2.phaseaccum = 0;
 	osc1.phase = osc2.phase = 0;
-	osc1.duty = osc2.duty = 128;
+	osc1.duty = osc2.duty = 0;
 	*((uint16_t*)osc1.level) = 0x01FF;
 	*((uint16_t*)osc2.level) = 0;
 	osc1.tuningword = osc2.tuningword = pgm_read_dword(keyFreq + osc1.note + KEY_OFFSET);
@@ -44,10 +44,10 @@ void Osc_Init()
 	osc2.index = byte_addr(osc2.phaseaccum, 2);
 	
 	//Setup ADC events
-	ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
-	ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
-	ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeDuty1;
-	ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeDuty2;
+	//ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
+	//ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
+	//ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeDuty1;
+	//ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeDuty2;
 		
 	//Set flags for updating osc on first run
 	NextOsc1LevelReady = NextOsc2LevelReady = 0;
@@ -198,7 +198,7 @@ ISR(TIMER0_OVF_vect)
 	else if(*((int16_t*)mixOut) < 0)
 		mixOut[0] = 0;
 	
-	OCR0A = mixOut[0];
+	OCR0A = osc1Out[0];
 	
 	//Limit only 1 to be updated per cycle
 	if(NextOsc1WaveReady)
