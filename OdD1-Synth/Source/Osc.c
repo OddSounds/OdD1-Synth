@@ -44,8 +44,8 @@ void Osc_Init()
 	osc2.index = byte_addr(osc2.phaseaccum, 2);
 	
 	//Setup ADC events
-	//ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
-	//ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
+	ADCChangeHandler[ANALOG_OSC1_WAVEFORM] = Osc_ChangeWave1;
+	ADCChangeHandler[ANALOG_OSC2_WAVEFORM] = Osc_ChangeWave2;
 	//ADCChangeHandler[ANALOG_OSC1_DUTY_CYCLE] = Osc_ChangeDuty1;
 	//ADCChangeHandler[ANALOG_OSC2_DUTY_CYCLE] = Osc_ChangeDuty2;
 		
