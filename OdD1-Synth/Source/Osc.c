@@ -111,7 +111,7 @@ ISR(TIMER1_OVF_vect)
 	
 	osc1.phaseaccum += osc1.tuningword;	
 	index = *((uint16_t*)&osc1.phaseaccum + 1) & 0x01FF;
-	osc1out = pgm_read_word(analogWaveTable + index);
+	osc1out = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform] + index);
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
 	/*fraction[1] = whole[1] = 0;
