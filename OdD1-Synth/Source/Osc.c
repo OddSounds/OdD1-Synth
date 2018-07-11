@@ -101,17 +101,20 @@ void Osc_ChangeLevel2(uint16_t level)
 //53% of 510 cycles (LFO/ADSR/NOISE)
 ISR(TIMER1_OVF_vect)
 {
-	uint16_t osc1out;
+	uint16_t oscA, oscB;
 	uint16_t index;
-	/*uint8_t osc1Out[2], osc2Out[2];
-	uint8_t fraction[2], whole[2];
-	uint8_t mixOut[2];
-	uint32_t mixindex;*/
+	int32_t oscmix;
 	sbi(PORTD, PORTD5); //Timing start
 	
 	osc1.phaseaccum += osc1.tuningword;	
 	index = *((uint16_t*)&osc1.phaseaccum + 1) & 0x01FF;
-	osc1out = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform] + index);
+	oscA = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform] + index);
+	oscB = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform + 1] + index);
+	oscmix = oscA;
+	oscmix -= oscB;
+	oscmix *= osc1.wavemix;
+	oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+	OCR1A = (uint16_t)(oscmix + oscB);
 	//Grab osc1 waveform
 	//Reusing fraction and whole. Sue me.
 	/*fraction[1] = whole[1] = 0;
@@ -123,12 +126,20 @@ ISR(TIMER1_OVF_vect)
 	*((uint16_t*)fraction) *= osc1.wavemix;
 	*((uint16_t*)whole) *= osc1.wavemixnext;
 	*((uint16_t*)whole) += *((uint16_t*)fraction);
-	osc1Out[0] = whole[1];
+	osc1Out[0] = whole[1];*/
 	
 	
 	osc2.phaseaccum += osc2.tuningword;
+	index = *((uint16_t*)&osc2.phaseaccum + 1) & 0x01FF;
+	oscA = pgm_read_word(analogWaveTable + waveformOffset[osc2.waveform] + index);
+	oscB = pgm_read_word(analogWaveTable + waveformOffset[osc2.waveform + 1] + index);
+	oscmix = oscA;
+	oscmix -= oscB;
+	oscmix *= osc2.wavemix;
+	oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+	OCR2A = (uint16_t)(oscmix + oscB);
 	//Grab osc2 waveform
-	fraction[1] = whole[1] = 0;
+	/*fraction[1] = whole[1] = 0;
 	mixindex = (int)analogWaveTable + (uint8_t)(*osc2.index + osc2.phase);
 	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc2.waveform]);
 	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc2.waveform + 1]);
@@ -139,33 +150,19 @@ ISR(TIMER1_OVF_vect)
 	*((uint16_t*)whole) += *((uint16_t*)fraction);
 	osc2Out[0] = whole[1];*/
 	
-	OCR1A = osc1out;
-	
 	//Limit only 1 to be updated per cycle
 	if(NextOsc1WaveReady)
 	{
 		osc1.waveform = NextOsc1Waveform[1];
 		osc1.wavemix = ~NextOsc1Waveform[0];
-		osc1.wavemixnext = NextOsc1Waveform[0];
 		NextOsc1WaveReady = 0;
-	}
-	else if(NextOsc1LevelReady)
-	{
-		*((uint16_t*)osc1.level) = *((uint16_t*)NextOsc1Level);
-		NextOsc1LevelReady = 0;
 	}
 	else if(NextOsc2WaveReady)
 	{
 		osc2.waveform = NextOsc2Waveform[1];
 		osc2.wavemix = ~NextOsc2Waveform[0];
-		osc2.wavemixnext = NextOsc2Waveform[0];
 		NextOsc2WaveReady = 0;
 	}	
-	else if(NextOsc2LevelReady)
-	{
-		*((uint16_t*)osc2.level) = *((uint16_t*)NextOsc2Level);
-		NextOsc2LevelReady = 0;
-	}
 	
 	cbi(PORTD, PORTD5); //Timing stop
 }

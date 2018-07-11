@@ -133,7 +133,7 @@ PROGMEM const uint16_t analogWaveTable[]  =
 	85,95,105,116,127,139,151,163,176,188,202,215,228,242
 };
 
-static const uint16_t waveformOffset[] = {0, 512, 1024, 1536, 2048};
+static const uint16_t waveformOffset[] = {0, 512, 1024, 2048, 1536};
 
 #define KEY_OFFSET	10
 
