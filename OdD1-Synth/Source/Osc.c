@@ -101,8 +101,7 @@ void Osc_ChangeLevel2(uint16_t level)
 //53% of 510 cycles (LFO/ADSR/NOISE)
 ISR(TIMER1_OVF_vect)
 {
-	uint16_t oscA, oscB;
-	uint16_t index;
+	uint16_t oscA, oscB, index;
 	int32_t oscmix;
 	sbi(PORTD, PORTD5); //Timing start
 	
@@ -112,45 +111,40 @@ ISR(TIMER1_OVF_vect)
 	oscB = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform + 1] + index);
 	//a*m + b*(1 - m) => (a - b)*m + b
 	//2 multiplies, 1 addition, 1 subtraction => 1 multiply, 1 addition, 1 subtraction
-	oscmix = oscA;
-	oscmix -= oscB;
-	oscmix *= osc1.wavemix;
-	oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
-	OCR1A = (uint16_t)(oscmix + oscB);
-	//Grab osc1 waveform
-	//Reusing fraction and whole. Sue me.
-	/*fraction[1] = whole[1] = 0;
-	mixindex = (int)analogWaveTable + (uint8_t)(*osc1.index + osc1.phase);
-	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform]);
-	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc1.waveform + 1]);
-	
-	//Mix waveform 1
-	*((uint16_t*)fraction) *= osc1.wavemix;
-	*((uint16_t*)whole) *= osc1.wavemixnext;
-	*((uint16_t*)whole) += *((uint16_t*)fraction);
-	osc1Out[0] = whole[1];*/
+	if(oscA > oscB)
+	{
+		oscmix = oscA - oscB;
+		oscmix *= osc1.wavemix;
+		oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+		OCR1A = (uint16_t)(oscmix + oscB);	
+	}
+	else
+	{
+		oscmix = oscB - oscA;
+		oscmix *= osc1.wavemix;
+		oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+		OCR1A = (uint16_t)(oscB - oscmix);		
+	}
 	
 	
 	osc2.phaseaccum += osc2.tuningword;
 	index = *((uint16_t*)&osc2.phaseaccum + 1) & 0x01FF;
 	oscA = pgm_read_word(analogWaveTable + waveformOffset[osc2.waveform] + index);
 	oscB = pgm_read_word(analogWaveTable + waveformOffset[osc2.waveform + 1] + index);
-	oscmix = oscA;
-	oscmix -= oscB;
-	oscmix *= osc2.wavemix;
-	oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
-	OCR2A = (uint16_t)(oscmix + oscB);
-	//Grab osc2 waveform
-	/*fraction[1] = whole[1] = 0;
-	mixindex = (int)analogWaveTable + (uint8_t)(*osc2.index + osc2.phase);
-	fraction[0] = pgm_read_byte(mixindex + waveformOffset[osc2.waveform]);
-	whole[0] = pgm_read_byte(mixindex + waveformOffset[osc2.waveform + 1]);
-	
-	//Mix waveform 2
-	*((uint16_t*)fraction) *= osc2.wavemix;
-	*((uint16_t*)whole) *= osc2.wavemixnext;
-	*((uint16_t*)whole) += *((uint16_t*)fraction);
-	osc2Out[0] = whole[1];*/
+	if(oscA > oscB)
+	{
+		oscmix = oscA - oscB;
+		oscmix *= osc1.wavemix;
+		oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+		OCR2A = (uint16_t)(oscmix + oscB);
+	}
+	else
+	{
+		oscmix = oscB - oscA;
+		oscmix *= osc1.wavemix;
+		oscmix = (int32_t)*((int16_t*)byte_addr(oscmix, 1));
+		OCR2A = (uint16_t)(oscB - oscmix);
+	}
 	
 	//Limit only 1 to be updated per cycle
 	if(NextOsc1WaveReady)
