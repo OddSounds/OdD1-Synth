@@ -110,6 +110,8 @@ ISR(TIMER1_OVF_vect)
 	index = *((uint16_t*)&osc1.phaseaccum + 1) & 0x01FF;
 	oscA = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform] + index);
 	oscB = pgm_read_word(analogWaveTable + waveformOffset[osc1.waveform + 1] + index);
+	//a*m + b*(1 - m) => (a - b)*m + b
+	//2 multiplies, 1 addition, 1 subtraction => 1 multiply, 1 addition, 1 subtraction
 	oscmix = oscA;
 	oscmix -= oscB;
 	oscmix *= osc1.wavemix;
